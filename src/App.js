@@ -1,26 +1,52 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React , {useEffect} from "react";
+import "./App.css";
+import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
+import Header from "./Header";
+import Home from "./Home";
+import Checkout from "./Checkout";
+import Login from "./Login.js";
+import { auth } from "./firebase";
+import { connect } from "react-redux";
+import {setUser} from './userActions'
+function App({user,setUser}) {
 
-function App() {
+  useEffect(() => {
+    // will only run once when the app component loads...
+    auth.onAuthStateChanged((authUser) => {
+      if (authUser) {
+        setUser(authUser)
+      } else {
+        setUser(null)
+      }
+    });
+  }, []);
+  
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Router>
+      <div className="app">
+        <Switch>
+          <Route path="/checkout">
+            <Header />
+            <Checkout />
+          </Route>
+          <Route path="/login">
+            <Login />
+          </Route>
+          <Route path="/">
+            <Header />
+            <Home />
+          </Route>
+        </Switch>
+      </div>
+    </Router>
   );
 }
-
-export default App;
+function mapStateToProps(state){
+  return {
+    user : state.userReducer
+  }
+}
+const mapDispatchToProps = {
+  setUser
+}
+export default connect(mapStateToProps,mapDispatchToProps)(App);
